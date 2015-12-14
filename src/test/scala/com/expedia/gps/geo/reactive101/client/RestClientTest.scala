@@ -1,6 +1,6 @@
-package com.expedia.gps.geo.reactive101.gaia.client
+package com.expedia.gps.geo.reactive101.client
 
-import com.expedia.gps.geo.reactive101.gaia.client.`type`.{SimpleResponse, CallSuccess}
+import com.expedia.gps.geo.reactive101.client.`type`.{CallSuccess, SimpleResponse}
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods._
 import org.scalatest.{FlatSpec, Matchers}

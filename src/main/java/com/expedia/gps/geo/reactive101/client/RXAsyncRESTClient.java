@@ -1,12 +1,13 @@
-package com.expedia.gps.geo.reactive101.gaia.client;
+package com.expedia.gps.geo.reactive101.client;
 
 import java.util.concurrent.Future;
 
 import rx.Observable;
 
-import com.expedia.gps.geo.reactive101.gaia.client.type.CallFailure;
-import com.expedia.gps.geo.reactive101.gaia.client.type.CallSuccess;
-import com.expedia.gps.geo.reactive101.gaia.client.type.SimpleResponse;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.CallFailure;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.SimpleResponse;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;

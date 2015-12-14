@@ -1,4 +1,4 @@
-package com.expedia.gps.geo.reactive101.gaia.client
+package com.expedia.gps.geo.reactive101.client
 
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
 

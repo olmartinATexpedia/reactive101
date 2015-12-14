@@ -1,4 +1,4 @@
-package com.expedia.gps.geo.reactive101.gaia.client;
+package com.expedia.gps.geo.reactive101.client;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,8 +13,10 @@ import reactor.rx.Promises;
 import reactor.rx.broadcast.Broadcaster;
 
 import com.codahale.metrics.Timer;
-import com.expedia.gps.geo.reactive101.gaia.client.type.CallSuccess;
-import com.expedia.gps.geo.reactive101.gaia.client.type.SimpleResponse;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.SimpleResponse;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.SimpleResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
@@ -94,10 +96,10 @@ public class ReactorBasicTest extends MultithreadedJavaTest{
         try {
           return client.call("localhost:4200", "/food/prepare" + food);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to get order", e);
-          }
-        }).map(checkFoodIsReady);
-      }catch (Exception e) {
+          throw new IllegalStateException("Failed to get order", e);
+        }
+      }).map(checkFoodIsReady);
+    } catch (Exception e) {
       log.error("An error occurs", e);
       throw new IllegalStateException("Failed to get order");
     }
@@ -109,7 +111,7 @@ public class ReactorBasicTest extends MultithreadedJavaTest{
     try {
       actualObj = mapper.readTree(success.getContent());
       String foodPrepared = actualObj.get("food").asText();
-//      System.out.println(foodPrepared);
+      //      System.out.println(foodPrepared);
       return foodPrepared;
     } catch (IOException e) {
       throw new IllegalStateException("Food preparation failed");

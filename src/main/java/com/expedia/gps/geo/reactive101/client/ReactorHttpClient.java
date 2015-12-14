@@ -1,4 +1,4 @@
-package com.expedia.gps.geo.reactive101.gaia.client;
+package com.expedia.gps.geo.reactive101.client;
 
 import reactor.io.codec.StringCodec;
 import reactor.io.net.NetStreams;
@@ -6,9 +6,9 @@ import reactor.io.net.http.HttpClient;
 import reactor.io.net.impl.netty.http.NettyHttpClient;
 import reactor.rx.Promise;
 
-import com.expedia.gps.geo.reactive101.gaia.client.type.CallFailure;
-import com.expedia.gps.geo.reactive101.gaia.client.type.CallSuccess;
-import com.expedia.gps.geo.reactive101.gaia.client.type.SimpleResponse;
+import com.expedia.gps.geo.reactive101.client.type.CallFailure;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.SimpleResponse;
 
 /**
  * @author olmartin@expedia.com

@@ -1,42 +1,26 @@
-package com.expedia.gps.geo.reactive101.gaia.client.scala
-
-import java.util.concurrent.TimeUnit
+package com.expedia.gps.geo.reactive101.client.scala
 
 import com.codahale.metrics.Timer.Context
 import com.codahale.metrics._
 import com.expedia.gps.geo.reactive101.scala.client._
-import org.slf4j.LoggerFactory
-
-import scala.concurrent.Future
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+
+import scala.concurrent.Future
 
 /**
  *
  * @author olmartin@expedia.com
  * @since 2015-11-13
  */
-object BasicScalaTest {
+object BasicScalaTest extends AbstractTest {
 
-  val rootLogger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[ch.qos.logback.classic.Logger]
-  rootLogger.setLevel(ch.qos.logback.classic.Level.OFF)
-
+  val NB_CALLS = 1000
   import scala.concurrent.ExecutionContext.Implicits.global
-  protected implicit val jsonFormats: Formats = DefaultFormats
-
-  private val NB_CALLS: Int = 1000
-
-  val metrics = new MetricRegistry()
-  val reporter = ConsoleReporter.forRegistry(metrics)
-    .convertRatesTo(TimeUnit.SECONDS)
-    .convertDurationsTo(TimeUnit.MILLISECONDS)
-    .build()
   val client = new DispatchRESTClient
-  val main: Timer = metrics.timer(s"Multiple call ${client.getClass.getSimpleName}")
-  val sub: Timer = metrics.timer(s"Multiple call.sub ${client.getClass.getSimpleName}")
 
   def main(args: Array[String]) {
-    val mainContext: Timer.Context = main.time()
+    val mainContext: Timer.Context = mainTimer.time()
     val futures: Future[Seq[String]] = doMultipleCall(client, metrics)
     futures onComplete { foods =>
       println(s"Nb food prepared: ${foods.get.size}")
@@ -47,7 +31,7 @@ object BasicScalaTest {
   }
 
   def orderAndGetFood: Future[String] = {
-    val subContext: Context = sub.time()
+    val subContext: Context = subTimer.time()
     client
       .callAsync("localhost:4200", "/food/takeOrder")
       .collect({ case success: CallSuccess => success })

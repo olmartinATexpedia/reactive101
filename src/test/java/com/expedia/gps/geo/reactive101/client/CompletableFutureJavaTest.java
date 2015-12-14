@@ -1,8 +1,11 @@
-package com.expedia.gps.geo.reactive101.gaia.client;
+package com.expedia.gps.geo.reactive101.client;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -11,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.expedia.gps.geo.reactive101.gaia.client.type.CallSuccess;
-import com.expedia.gps.geo.reactive101.gaia.client.type.SimpleResponse;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.SimpleResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,24 +40,20 @@ public class CompletableFutureJavaTest {
       .build();
   private static final ObjectMapper    mapper   = new ObjectMapper();
 
-  private interface ClientMethodCall {
-    CompletableFuture<SimpleResponse> call(String host, String path) throws Exception;
-  }
-
   private interface MainLogic {
-    void execute(ClientMethodCall methodCall, List<String> foods, AtomicInteger errors) throws Exception;
+    void execute(RestClient restClient, List<String> foods, AtomicInteger errors, Executor executor) throws Exception;
   }
 
-  private static MainLogic foodOrder = (m, foods, errors) -> {
+  private static MainLogic foodOrder = (restClient, foods, errors, executor) -> {
     try {
-      CompletableFuture<SimpleResponse> orderReturned = m.call("localhost:4200", "/food/takeOrder");
+      CompletableFuture<SimpleResponse> orderReturned = restClient.callAsync2("localhost:4200", "/food/takeOrder", executor);
       orderReturned.thenAccept(simpleResponse -> {
         if (simpleResponse instanceof CallSuccess) {
           try {
             JsonNode actualObj = mapper.readTree(((CallSuccess) simpleResponse).getContent());
             String food = actualObj.get("order").asText();
-            CompletableFuture<SimpleResponse> foodPreparedFuture = m
-                .call("localhost:4200", "/food/prepare" + food.substring(0, 1).toUpperCase() + food.substring(1));
+            CompletableFuture<SimpleResponse> foodPreparedFuture = restClient
+                .callAsync2("localhost:4200", "/food/prepare" + food.substring(0, 1).toUpperCase() + food.substring(1), executor);
             foodPreparedFuture.thenAccept(foodPrepared -> {
               if (foodPrepared instanceof CallSuccess) {
                 try {
@@ -84,17 +83,18 @@ public class CompletableFutureJavaTest {
   };
 
   public static void main(String[] args) throws Exception {
-    BasicRESTClient client = new BasicRESTClient();
-    run(client.getClass().getSimpleName(), foodOrder, client::callCompletableFuture);
+    RestClient client = new BasicRESTClient();
+    ExecutorService executor = Executors.newFixedThreadPool(10);
+    run(client, client.getClass().getSimpleName(), foodOrder, executor);
   }
 
-  private static void run(String id, MainLogic logic, ClientMethodCall clientMethodCall) throws Exception {
+  private static void run(RestClient restClient, String id, MainLogic logic, Executor executor) throws Exception {
     Timer main = metrics.timer("Multiple call " + id);
     Timer.Context mainContext = main.time();
     List<String> foods = new ArrayList<>();
     AtomicInteger errors = new AtomicInteger(0);
     for (int i = 0; i < NB_CALLS; i++) {
-      logic.execute(clientMethodCall, foods, errors);
+      logic.execute(restClient, foods, errors, executor);
     }
     while (foods.size() + errors.get() < NB_CALLS) {
       Thread.sleep(200);

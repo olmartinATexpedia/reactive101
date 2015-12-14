@@ -1,6 +1,7 @@
-package com.expedia.gps.geo.reactive101.gaia.client;
+package com.expedia.gps.geo.reactive101.client;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +13,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-import com.expedia.gps.geo.reactive101.gaia.client.type.CallFailure;
-import com.expedia.gps.geo.reactive101.gaia.client.type.CallSuccess;
-import com.expedia.gps.geo.reactive101.gaia.client.type.SimpleResponse;
+import com.expedia.gps.geo.reactive101.client.type.CallFailure;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.SimpleResponse;
 
 /**
  * A basic HTTP client.
@@ -30,6 +31,7 @@ public class BasicRESTClient implements RestClient {
           .setMaxConnPerRoute(100)
           .build();
 
+  @Override
   public SimpleResponse call(String host, String url) throws Exception {
     HttpGet httpGet = new HttpGet(url);
     CloseableHttpResponse response = httpClient.execute(HttpHost.create(host), httpGet);
@@ -44,27 +46,11 @@ public class BasicRESTClient implements RestClient {
 
   @Override
   public Future<SimpleResponse> callAsync(String host, String url) throws Exception {
-    return null;
+    return callAsync(host, url);
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  public CompletableFuture<SimpleResponse> callCompletableFuture(String host, String url) throws Exception {
+  @Override
+  public CompletableFuture<SimpleResponse> callAsync2(String host, String url, Executor executor) throws Exception {
     return CompletableFuture.supplyAsync(() -> {
       try {
         return call(host, url);

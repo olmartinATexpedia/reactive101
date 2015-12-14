@@ -2,7 +2,7 @@ package com.expedia.gps.geo.reactive101.scala.client
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
-import com.expedia.gps.geo.reactive101.gaia.client.`type`.SimpleResponse
+import com.expedia.gps.geo.reactive101.client.`type`.SimpleResponse
 import com.typesafe.config.{Config, ConfigFactory}
 import spray.client.pipelining._
 

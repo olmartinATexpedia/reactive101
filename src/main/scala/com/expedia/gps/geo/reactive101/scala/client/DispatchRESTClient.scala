@@ -1,6 +1,6 @@
 package com.expedia.gps.geo.reactive101.scala.client
 
-import com.expedia.gps.geo.reactive101.gaia.client.`type`.SimpleResponse
+import com.expedia.gps.geo.reactive101.client.`type`.SimpleResponse
 import dispatch.{Http, url}
 
 import scala.concurrent.duration._

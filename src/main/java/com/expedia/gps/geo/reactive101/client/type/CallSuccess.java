@@ -1,4 +1,4 @@
-package com.expedia.gps.geo.reactive101.gaia.client.type;
+package com.expedia.gps.geo.reactive101.client.type;
 
 import lombok.Getter;
 

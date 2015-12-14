@@ -1,4 +1,4 @@
-package com.expedia.gps.geo.reactive101.gaia.client;
+package com.expedia.gps.geo.reactive101.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,10 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.expedia.gps.geo.reactive101.gaia.client.type.CallSuccess;
-import com.expedia.gps.geo.reactive101.gaia.client.type.SimpleResponse;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.SimpleResponse;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.SimpleResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -69,10 +71,10 @@ public class MultithreadedJavaTest {
       new ArrayBlockingQueue<>(NB_CALLS));
 
   public static void main(String[] args) throws Exception {
-//    RestClient client = new BasicRESTClient();
-        RestClient client = new AsyncRESTClient();
+    //    RestClient client = new BasicRESTClient();
+    RestClient client = new AsyncRESTClient();
     run(client.getClass().getSimpleName(), foodOrder, client::call);
-        run(client.getClass().getSimpleName(), foodOrder, (host, port) -> client.callAsync(host, port).get());
+    run(client.getClass().getSimpleName(), foodOrder, (host, port) -> client.callAsync(host, port).get());
   }
 
   private static void run(String id, MainLogic logic, ClientMethodCall clientMethodCall) throws Exception {

@@ -1,4 +1,4 @@
-package com.expedia.gps.geo.reactive101.gaia.client;
+package com.expedia.gps.geo.reactive101.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +9,9 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.expedia.gps.geo.reactive101.gaia.client.type.CallSuccess;
-import com.expedia.gps.geo.reactive101.gaia.client.type.SimpleResponse;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.CallSuccess;
+import com.expedia.gps.geo.reactive101.client.type.SimpleResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -62,7 +63,7 @@ public class BasicJavaTest {
 
   public static void main(String[] args) throws Exception {
     RestClient client = new BasicRESTClient();
-//    RestClient client = new AsyncRESTClient();
+    //    RestClient client = new AsyncRESTClient();
 
     Timer main = metrics.timer("Multiple call " + client.getClass().getSimpleName());
     Timer sub = metrics.timer("Multiple call.sub " + client.getClass().getSimpleName());
@@ -70,7 +71,6 @@ public class BasicJavaTest {
     List<String> responses = new ArrayList<>();
     for (int i = 0; i < NB_CALLS; i++) {
       Timer.Context subContext = sub.time();
-
 
       SimpleResponse orderReturned = client.call("localhost:4200", "/food/takeOrder");
       if (orderReturned instanceof CallSuccess) {
@@ -92,7 +92,6 @@ public class BasicJavaTest {
     mainContext.close();
     reporter.report();
     System.exit(0);
-
 
   }
 }
