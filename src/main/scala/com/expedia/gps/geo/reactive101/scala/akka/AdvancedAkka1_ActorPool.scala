@@ -8,25 +8,26 @@ import org.json4s.{MappingException, DefaultFormats, Formats, JValue}
 import org.json4s.jackson.JsonMethods._
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future, ExecutionContext}
 
 /**
-  * TODO. 
+  * An advanced example using actors pool.
   */
 object AdvancedAkka1_ActorPool {
 
   val rootLogger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[ch.qos.logback.classic.Logger]
   rootLogger.setLevel(ch.qos.logback.classic.Level.OFF)
 
-  val system = ActorSystem.create("AKKA_test")
+  val system = ActorSystem("AKKA_test")
   implicit val executionContext: ExecutionContext = system.dispatcher
   val restClient = new DispatchRESTClient()
 
 
   def main(args: Array[String]) {
     val featureAnalyzer = system.actorOf(Props[FeatureAnalyzer], "featureAnalyzer")
-    system.actorOf(RoundRobinPool(6).props(Props[GaiaCallActor]), "GaiaCallActor")
-    featureAnalyzer ! CheckFeature(319476388295869578L)
+    system.actorOf(RoundRobinPool(20).props(Props[GaiaCallActor]), "GaiaCallActor")
+    featureAnalyzer ! CheckFeature(179898)
   }
 
   class FeatureAnalyzer() extends Actor {
@@ -52,29 +53,29 @@ object AdvancedAkka1_ActorPool {
     def receive = {
 
       case FindChildOf(id) =>
-        originalSender = context.sender()
+        originalSender = sender()
         val gaiaCallActor = context.actorSelection("/user/GaiaCallActor")
         gaiaCallActor ! CallGaia(id)
 
       case f: FeatureInfo =>
-        feature = f
         if (f.childrenOfIds.isEmpty)
           originalSender ! HierarchyFound(FeatureInfoFull(f.id, f.name, Nil))
         else {
-          f.childrenOfIds.foreach { id =>
-            val featureAnalyzer = context.actorOf(Props[ChildOfAnalyzer], s"ChildOfAnalyzer$id")
-            featureAnalyzer ! FindChildOf(id)
-          }
+          feature = f
+          for {
+              id <- f.childrenOfIds
+              featureAnalyzer = context.actorOf(Props[ChildOfAnalyzer], s"ChildOfAnalyzer$id")
+          } featureAnalyzer ! FindChildOf(id)
         }
 
       case HierarchyFound(childOf) =>
-        context.stop(sender())
-        childrenOf = childrenOf.+:(childOf)
-        if (childrenOf.length == feature.childrenOfIds.size)
+        childrenOf +:= childOf
+        if (childrenOf.size == feature.childrenOfIds.size) {
+          println(s"Finish ${feature.id}")
           originalSender ! HierarchyFound(FeatureInfoFull(feature.id, feature.name, childrenOf))
-//        else
-//          println(s"Waiting for some child features for ${feature.id}: ${feature.childrenOfIds.diff(childrenOf)}")
-
+        }
+        else
+          println(s"Waiting for ${feature.childrenOfIds.size - childrenOf.size} to finish ${feature.id}")
     }
   }
 
@@ -82,17 +83,15 @@ object AdvancedAkka1_ActorPool {
     def receive = {
 
       case CallGaia(id) =>
-        println(s"Search $id")
-        val sender = context.sender()
-        extractChildOf(id) map { featureInfo =>
-          sender ! featureInfo
-        }
-
+        val s = sender()
+        val featureInfo = Await.result(extractChildOf(id), Duration.Inf)
+        s ! featureInfo
     }
   }
 
   def extractFeatureInfo(id: Long, response: SimpleResponse) : FeatureInfo = {
     response match {
+
       case CallSuccess(content) =>
         try {
           implicit val jsonFormats: Formats = DefaultFormats
@@ -103,13 +102,10 @@ object AdvancedAkka1_ActorPool {
           val ids = featureIds.extractOpt[Seq[String]].getOrElse(featureIds.extract[String] :: Nil).map(_.toLong)
           FeatureInfo(id, name, ids)
         } catch {
-          case e: MappingException =>
-            e.printStackTrace()
-            System.err.println(s"Failed to parse response for $id - $content")
-            FeatureInfo(id, "?", Nil)
           case e: Exception => e.printStackTrace()
             FeatureInfo(id, "?", Nil)
         }
+
       case CallFailure(statusCode, content) =>
         System.err.println(s"Failed to call for $id - $statusCode - $content")
         FeatureInfo(id, "?", Nil)

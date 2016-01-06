@@ -2,9 +2,6 @@ buildscript {
     repositories {
         mavenCentral()
         mavenLocal()
-        maven { url "http://gpsrepository.karmalab.net:8082/nexus/content/groups/public/" }
-        maven { url "http://nexus.sb.karmalab.net/nexus/content/repositories/gps-releases/" }
-        maven { url "http://nexus.sb.karmalab.net/nexus/content/repositories/gps-snapshots/" }
     }
 }
 plugins {
@@ -12,12 +9,19 @@ plugins {
 }
 
 apply plugin: 'scala'
-apply plugin: 'idea'
 apply plugin: "com.github.maiflai.scalatest"
-apply plugin: 'maven-publish'
+apply plugin: 'idea'
 
 group = 'com.expedia.gps'
 version = '0.1.0-SNAPSHOT'
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ['src/main/resources', 'src/main/webapp']
+        }
+    }
+}
 
 allprojects {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -56,6 +60,7 @@ dependencies {
     compile "com.typesafe.scala-logging:scala-logging_$scalaLangVersion:$scalaLoggingVersion"
     compile "com.typesafe.akka:akka-actor_$scalaLangVersion:$akkaVersion"
     compile "com.typesafe.akka:akka-slf4j_$scalaLangVersion:$akkaVersion"
+    compile "com.typesafe.akka:akka-cluster_$scalaLangVersion:$akkaVersion"
     
     compile "ch.qos.logback:logback-classic:$logbackVersion"
     
@@ -114,38 +119,10 @@ test {
     ignoreFailures = true
 }
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifactId 'gaia-rt-utilities'
-            from components.java
-            artifact sourceJar {
-                classifier "sources"
-            }
-        }
-    }
-}
-
-configurations {
-    deployerJars
-}
-
 repositories {
     mavenLocal()
     maven { url "http://maven.geotoolkit.org" }
     mavenCentral()
     maven { url "http://download.java.net/maven/2" }
     maven { url "http://download.osgeo.org/webdav/geotools/" }
-}
-
-idea {
-    module {
-        name = "Reactive101"
-        downloadJavadoc = false
-        downloadSources = true
-    }
 }

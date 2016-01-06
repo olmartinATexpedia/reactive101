@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext
   */
 object BasicAkka4_Become  {
 
-  val system = ActorSystem.create("AKKA_test")
+  val system = ActorSystem("AKKA_test")
   implicit val executionContext: ExecutionContext = system.dispatcher
 
   def main(args: Array[String]) {

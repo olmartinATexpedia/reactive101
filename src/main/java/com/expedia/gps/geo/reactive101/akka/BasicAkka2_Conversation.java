@@ -8,7 +8,7 @@ import akka.actor.UntypedActor;
 import lombok.Value;
 
 /**
- * TODO.
+ * A conversation between two actors.
  */
 public class BasicAkka2_Conversation {
 

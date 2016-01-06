@@ -7,7 +7,7 @@ import akka.actor.UntypedActor;
 import lombok.Value;
 
 /**
- * TODO.
+ * A basic actor developed in Java.
  */
 public class BasicAkka1_HelloWorld {
 

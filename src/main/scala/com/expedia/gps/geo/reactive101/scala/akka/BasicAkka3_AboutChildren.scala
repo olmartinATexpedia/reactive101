@@ -5,26 +5,25 @@ import akka.actor._
 import scala.concurrent.ExecutionContext
 
 /**
-  * TODO. 
+  * Creation of children, kill children.
   */
 object BasicAkka3_AboutChildren  {
 
-  val system = ActorSystem.create("AKKA_test")
+  val system = ActorSystem("AKKA_test")
   implicit val executionContext: ExecutionContext = system.dispatcher
 
   def main(args: Array[String]) {
-    val myActor = system.actorOf(Props(classOf[MyActor], 0), "myActor0")
-    val myActorb = system.actorOf(Props(classOf[MyActor], 0), "myActor0b")
+    val myActor = system.actorOf(Props(classOf[MyActor], 0), "myActor")
+    val myActorb = system.actorOf(Props(classOf[MyActor], 0), "myActor2")
     println(myActor)
     myActor ! CreateChildren(3)
     Thread.sleep(100)
+    system.actorSelection("*/myActor*") ! Identify(deep = true)
 
-//    myActor ! PoisonPill
 //    system.actorSelection("/user/myActor0/myActor1/myActor2") ! PoisonPill
 //    myActor ! StopChildren(2)
 
-//    system.actorSelection("**/myActor*") ! Identify()
-    system.actorSelection("*/myActor*") ! Identify()
+//    myActor ! PoisonPill
 
     Thread.sleep(100)
     system.shutdown()
@@ -32,13 +31,13 @@ object BasicAkka3_AboutChildren  {
 
   case class CreateChildren(nbChildren: Integer)
   case class StopChildren(depth: Integer)
-  case class Identify()
+  case class Identify(deep: Boolean = false)
 
   class MyActor(depth: Integer) extends Actor {
     def receive = {
 
       case CreateChildren(nbChildren) if nbChildren > 0 =>
-        val child = context.actorOf(Props(classOf[MyActor], depth + 1), s"myActor${depth + 1}")
+        val child = context.actorOf(Props(classOf[MyActor], depth + 1), s"myActorChild${depth + 1}")
         println(child)
         child ! CreateChildren(nbChildren - 1)
 
@@ -49,7 +48,10 @@ object BasicAkka3_AboutChildren  {
         else
           child ! stop
 
-      case Identify() => println(s"I am ${context.self.path}")
+      case identify@Identify(deep) =>
+        println(s"I am ${context.self.path}")
+        if (deep)
+          context.children.foreach(_ ! identify)
     }
 
     override def postStop(){

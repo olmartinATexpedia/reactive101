@@ -5,11 +5,11 @@ import akka.actor.{Actor, ActorSystem, Props}
 import scala.concurrent.ExecutionContext
 
 /**
-  * TODO. 
+  * A basic actor developed in scala.
   */
 object BasicAkka1_HelloWorld  {
 
-  val system = ActorSystem.create("AKKA_test")
+  val system = ActorSystem("AKKA_test")
   implicit val executionContext: ExecutionContext = system.dispatcher
 
   def main(args: Array[String]) {
@@ -25,4 +25,5 @@ object BasicAkka1_HelloWorld  {
       case Hello(name) => println(s"Hello $name !")
     }
   }
+
 }
